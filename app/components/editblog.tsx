@@ -68,7 +68,7 @@ const EditBlogForm: React.FC<EditBlogFormProps> = ({ blogId }) => {
       toast.success("Blog updated successfully!");
       router.push("/blog");
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(err.message || "Failed to update blog");
     },
   });

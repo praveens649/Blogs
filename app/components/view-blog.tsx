@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, User, Clock, BookOpen, Share2, Heart, MessageCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
 
 interface Blog {
   id: string;
@@ -73,7 +74,7 @@ const ViewBlog = ({ blogId }: { blogId: string }) => {
       <div className="relative overflow-hidden">
         {blog.image_url ? (
           <div className="relative w-full h-[60vh] bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10">
-            <img
+            <Image
               src={blog.image_url}
               alt={blog.title}
               className="w-full h-full object-cover"

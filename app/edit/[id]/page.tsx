@@ -1,9 +1,15 @@
 
 import EditBlogForm from "@/app/components/editblog";
-export default function EditBlogPage({ params }: { params: { id: string } }) {
-  return (
-    <div className="p-6">
-      <EditBlogForm blogId={params.id} />
-    </div>
-  );
+interface Props {
+    params:Promise<{id:string}>;
 }
+const page = async (props:Props) => {
+  const params = await props.params;  
+  const {id } =  params;
+  return (
+    <EditBlogForm
+    blogId={id}/>
+  )
+}
+
+export default page

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Mail, Lock, LogIn, UserPlus, Sparkles } from "lucide-react";
+import { Loader2, Mail, Lock, LogIn, UserPlus, } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -158,7 +158,7 @@ const LoginForm = () => {
             </div>
             
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <span>Don't have an account?</span>
+              <span>Don&apos;t have an account?</span>
               <Link 
                 href="/signup" 
                 className="font-medium text-primary hover:text-primary/80 transition-colors duration-300 flex items-center gap-1 group"
