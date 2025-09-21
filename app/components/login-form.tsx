@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { AuthService } from "@/app/backend/auth.service";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Mail, Lock, LogIn, UserPlus, } from "lucide-react";
-import { toast } from "sonner";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Loader2, Lock, LogIn, Mail, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface LoginFormData {
   email: string;
@@ -21,10 +21,10 @@ const LoginForm = () => {
     email: "",
     password: "",
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,24 +40,23 @@ const LoginForm = () => {
     setError(null);
 
     try {
-      if (!formData.email) throw new Error("Email is required");
-      if (!formData.password) throw new Error("Password is required");
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      const authService = new AuthService();
-      const result = await authService.login(formData.email, formData.password);
-
-      if (result.error) {
-        throw new Error(result.error);
+      if (signInError) {
+        setError(signInError.message);
+        toast.error("Failed to log in");
+        return;
       }
 
-      if (!result.user) {
-        throw new Error("Login failed - no user returned");
-      }
-
-      toast(`Login successful! ${formData.email}`);
+      toast.success("Successfully logged in");
       router.push("/blog");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred during login");
+      // Auth state change in page.tsx will handle navigation
+    } catch (error) {
+      console.error("Error logging in:", error);
+      toast.error("Failed to log in");
     } finally {
       setIsLoading(false);
     }
@@ -67,11 +66,11 @@ const LoginForm = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10 flex items-center justify-center px-4 py-8">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      
+
       <Card className="relative w-full max-w-lg shadow-2xl border-0 bg-gradient-to-br from-card via-card to-card/50 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-lg"></div>
-        
+
         <CardHeader className="relative text-center space-y-6 pt-8">
           <div className="flex items-center justify-center gap-3">
             <div className="p-3 bg-primary/10 rounded-2xl">
@@ -87,11 +86,14 @@ const LoginForm = () => {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="relative space-y-6 pb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
+              <Label
+                htmlFor="email"
+                className="flex items-center gap-2 text-sm font-medium"
+              >
                 <Mail className="w-4 h-4" />
                 Email Address
               </Label>
@@ -107,7 +109,10 @@ const LoginForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
+              <Label
+                htmlFor="password"
+                className="flex items-center gap-2 text-sm font-medium"
+              >
                 <Lock className="w-4 h-4" />
                 Password
               </Label>
@@ -122,9 +127,9 @@ const LoginForm = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 group text-base" 
+            <Button
+              type="submit"
+              className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 group text-base"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -142,11 +147,13 @@ const LoginForm = () => {
 
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-sm text-destructive text-center font-medium">{error}</p>
+                <p className="text-sm text-destructive text-center font-medium">
+                  {error}
+                </p>
               </div>
             )}
           </form>
-          
+
           <div className="text-center space-y-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -156,11 +163,11 @@ const LoginForm = () => {
                 <span className="bg-card px-2 text-muted-foreground">Or</span>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <span>Don&apos;t have an account?</span>
-              <Link 
-                href="/signup" 
+              <Link
+                href="/signup"
                 className="font-medium text-primary hover:text-primary/80 transition-colors duration-300 flex items-center gap-1 group"
               >
                 <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />

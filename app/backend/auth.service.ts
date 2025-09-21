@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
-import { AuthError,  User } from "@supabase/supabase-js";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { AuthError, User } from "@supabase/supabase-js";
 
 interface SignUpData {
   username: string;
@@ -13,6 +14,8 @@ interface AuthResponse {
 }
 
 export class AuthService {
+  private supabase = createClientComponentClient();
+
   async getCurrentUserEmail(): Promise<string | null> {
     try {
       const { data, error } = await supabase.auth.getUser();
@@ -38,11 +41,15 @@ export class AuthService {
 
   async getCurrentUserId(): Promise<string | null> {
     try {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      return data.user?.id || null;
+      const { data: { session } } = await this.supabase.auth.getSession();
+      
+      if (!session) {
+        return null;
+      }
+
+      return session.user?.id || null;
     } catch (error) {
-      console.error("Error fetching user ID:", error);
+      console.log("Error fetching user ID:", error);
       return null;
     }
   }

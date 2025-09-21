@@ -1,6 +1,9 @@
-import LoginForm from "../components/login-form";
+import LoginWrapper from "../components/login-wrapper";
 
-
-export default function Login() {
-    return <LoginForm/>;
-  }
+export default function LoginPage() {
+  return (
+    <div>
+      <LoginWrapper />
+    </div>
+  );
+}

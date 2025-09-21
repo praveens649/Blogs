@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AuthService } from "../backend/auth.service";
@@ -21,17 +23,41 @@ import { Blog, BlogService } from "../backend/blog.service";
 import LogoutButton from "./logout-form";
 
 const BlogPage = () => {
+  const router = useRouter();
+  const supabase = createClientComponentClient();
   const queryClient = useQueryClient();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const getCurrentUser = async () => {
-      const authService = new AuthService(); // Move inside the effect
+      const authService = new AuthService();
       const userId = await authService.getCurrentUserId();
+
+      if (!userId) {
+        router.replace("/login");
+        return;
+      }
+
       setCurrentUserId(userId);
     };
+
     getCurrentUser();
-  }, []); // Empty dependency array is fine now since we create authService inside
+  }, [router]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+      // Your existing auth check logic...
+    };
+
+    checkAuth();
+  }, [router, supabase]);
 
   const {
     data: blogs,
@@ -100,7 +126,7 @@ const BlogPage = () => {
                 </div>
                 <div>
                   <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                    Latest Blogs
+                    Blogspace
                   </h1>
                   <p className="text-muted-foreground mt-2 text-lg">
                     Discover amazing stories and insights
